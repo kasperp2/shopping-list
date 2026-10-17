@@ -51,6 +51,19 @@
     };
   });
 
+  // A tap on the field normally makes iOS scroll the whole (locked) page up to
+  // keep the field clear of the keyboard, and the bar lifts itself as well, so
+  // everything jumps. Focus it ourselves without that scroll instead.
+  onMount(() => {
+    const onTouchEnd = (e: TouchEvent) => {
+      if (document.activeElement === input) return;
+      e.preventDefault();
+      input.focus({ preventScroll: true });
+    };
+    input.addEventListener('touchend', onTouchEnd, { passive: false });
+    return () => input.removeEventListener('touchend', onTouchEnd);
+  });
+
   function submit(e: SubmitEvent) {
     e.preventDefault();
     if (!parsed.name) return;
@@ -245,6 +258,14 @@
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-top: 0.5px solid var(--separator);
+    /* iOS reports the final keyboard height as soon as it starts sliding, so
+       ease along with it (≈ the system keyboard curve) instead of jumping. */
+    transition: transform 380ms cubic-bezier(0.19, 0.91, 0.38, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar {
+      transition: none;
+    }
   }
   .bar.keyboard {
     padding-bottom: 8px;

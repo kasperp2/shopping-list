@@ -35,6 +35,9 @@ export default defineConfig({
   ],
   server: {
     host: true,
+    // Bind-mounted source in Docker (docker-compose.dev.yml) misses file
+    // events for deleted/replaced files, so poll there.
+    watch: process.env.VITE_POLL ? { usePolling: true, interval: 200 } : undefined,
     // server.ts answers /config.json and proxies /dav (in docker-compose.dev.yml it's the "api" service)
     proxy: {
       '/config.json': process.env.DEV_API ?? 'http://localhost:3000',

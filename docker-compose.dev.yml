@@ -16,6 +16,7 @@ services:
       - "5173:5173"
     environment:
       DEV_API: http://api:3000
+      VITE_POLL: "1"
     volumes:
       - .:/app
       # Linux packages (sharp, esbuild…) stay in the container, apart from the Mac's node_modules.
