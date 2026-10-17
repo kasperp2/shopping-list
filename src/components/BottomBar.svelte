@@ -24,12 +24,30 @@
   onMount(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const update = () => (keyboard = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)));
+    const measure = () => (keyboard = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)));
+    // iOS fires the first resize as the keyboard starts to animate, often with
+    // the old height, and nothing after it while the page can't scroll. So keep
+    // measuring every frame for a moment after anything keyboard-related.
+    let until = 0;
+    let frame = 0;
+    const tick = () => {
+      measure();
+      frame = performance.now() < until ? requestAnimationFrame(tick) : 0;
+    };
+    const update = () => {
+      until = performance.now() + 700;
+      if (!frame) frame = requestAnimationFrame(tick);
+    };
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
+    window.addEventListener('focusin', update);
+    window.addEventListener('focusout', update);
     return () => {
+      cancelAnimationFrame(frame);
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
+      window.removeEventListener('focusin', update);
+      window.removeEventListener('focusout', update);
     };
   });
 
@@ -240,7 +258,7 @@
     left: 0;
     right: 0;
     height: 100vh;
-    background: var(--bar);
+    background: var(--bar-solid);
   }
   .chips {
     display: flex;
