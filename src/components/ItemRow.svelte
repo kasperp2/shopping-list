@@ -13,7 +13,15 @@
   }
 </script>
 
-<SwipeRow ondelete={() => app.remove(item.uid)}>
+<SwipeRow
+  ondelete={() => app.remove(item.uid)}
+  leading={{
+    label: item.completed ? 'Fjern flueben' : 'Sæt flueben',
+    icon: item.completed ? 'xmark' : 'check',
+    color: item.completed ? '#8e8e93' : 'var(--green)',
+    run: () => app.toggle(item.uid),
+  }}
+>
   <div class="row" class:done={item.completed}>
     <button
       class="main"

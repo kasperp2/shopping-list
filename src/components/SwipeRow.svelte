@@ -5,15 +5,24 @@
 
 <script lang="ts">
   import { untrack, type Snippet } from 'svelte';
-  import { project, rubberband, spring, VelocityTracker } from '../lib/spring';
+  import { haptic, project, rubberband, spring, VelocityTracker } from '../lib/spring';
+  import Icon, { type IconName } from './Icon.svelte';
 
   let {
     ondelete,
     label = 'Slet',
+    leading,
     children,
-  }: { ondelete: () => void; label?: string; children: Snippet } = $props();
+  }: {
+    ondelete: () => void;
+    label?: string;
+    /** Swipe right past the threshold to run this; the row springs back. */
+    leading?: { label: string; icon: IconName; color: string; run: () => void };
+    children: Snippet;
+  } = $props();
 
   const ACTION_W = 84;
+  const LEAD_AT = 88;
   const id = Symbol();
   let x = $state(0);
   let width = $state(360);
@@ -24,6 +33,15 @@
   const tracker = new VelocityTracker();
 
   const fullSwipe = $derived(-x > width * 0.6);
+  const armed = $derived(x > LEAD_AT);
+
+  // A tick as the leading action arms or disarms, like Mail.
+  let wasArmed = false;
+  $effect(() => {
+    const a = armed;
+    if (gesture?.mode === 'swipe' && a !== wasArmed) haptic();
+    wasArmed = a;
+  });
 
   let deleting = false;
 
@@ -78,7 +96,9 @@
     if (gesture.mode !== 'swipe') return;
     tracker.add(e.clientX, 0);
     const raw = gesture.start + (e.clientX - gesture.x0);
-    x = raw > 0 ? rubberband(raw, width) : raw;
+    if (raw <= 0) x = raw;
+    else if (leading) x = raw > width * 0.7 ? width * 0.7 + rubberband(raw - width * 0.7, width) : raw;
+    else x = rubberband(raw, width);
   }
 
   function up(e: PointerEvent) {
@@ -90,6 +110,15 @@
     setTimeout(() => (suppressClick = false), 0);
     const v = tracker.get().x;
     const rest = x + project(v, 0.99);
+    if (x > 0) {
+      if (leading && (x > LEAD_AT || (rest > width * 0.5 && v > 600))) {
+        if (x <= LEAD_AT) haptic();
+        leading.run();
+      }
+      animateTo(0, v);
+      if (openRow === id) openRow = null;
+      return;
+    }
     if (-x > width * 0.6 || (rest < -width * 0.75 && v < -600)) commitDelete(v);
     else if (rest < -ACTION_W / 2) animateTo(-ACTION_W, v);
     else {
@@ -112,6 +141,18 @@
 </script>
 
 <div class="wrap" bind:this={el}>
+  {#if leading}
+    <div
+      class="lead"
+      style:background={leading.color}
+      style:width="{Math.max(0, x)}px"
+      style:visibility={x > 0.5 ? 'visible' : 'hidden'}
+      aria-hidden="true"
+    >
+      <span class="lead-icon" class:armed><Icon name={leading.icon} size={22} stroke={2.6} /></span>
+      <span class="sr-only">{leading.label}</span>
+    </div>
+  {/if}
   <button
     class="action"
     style:width="{Math.max(ACTION_W, -x)}px"
@@ -158,6 +199,32 @@
     width: 84px;
     text-align: center;
     transition: transform 200ms var(--ease-out);
+  }
+  .lead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+  .lead-icon {
+    flex: none;
+    width: 64px;
+    display: grid;
+    place-items: center;
+    opacity: 0.6;
+    transform: scale(0.8);
+    transition:
+      transform 200ms var(--ease-out),
+      opacity 200ms;
+  }
+  .lead-icon.armed {
+    opacity: 1;
+    transform: scale(1);
   }
   .front {
     position: relative;

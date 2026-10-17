@@ -53,6 +53,7 @@ class AppState {
   toast = $state<Toast | null>(null);
   /** uid → time it was ticked; ticked items linger so a mis-tap can be undone */
   justTicked = $state<Record<string, number>>({});
+  private lingerTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   items = $derived(this.currentUrl ? applyOps(this.serverItems, this.queue, this.currentUrl) : []);
   currentList = $derived(this.lists.find((l) => l.url === this.currentUrl));
@@ -307,16 +308,24 @@ class AppState {
     if (!item) return;
     const { [uid]: _, ...rest } = this.justTicked;
     if (item.completed) {
+      clearTimeout(this.lingerTimers.get(uid));
+      this.lingerTimers.delete(uid);
       this.justTicked = rest;
       this.update(uid, { completed: false });
       return;
     }
     this.justTicked = { ...rest, [uid]: Date.now() };
     this.update(uid, { completed: true });
-    setTimeout(() => {
-      const { [uid]: _gone, ...left } = this.justTicked;
-      this.justTicked = left;
-    }, LINGER_MS);
+    // a fresh tick restarts the linger, so untick → tick again gets the full time
+    clearTimeout(this.lingerTimers.get(uid));
+    this.lingerTimers.set(
+      uid,
+      setTimeout(() => {
+        this.lingerTimers.delete(uid);
+        const { [uid]: _gone, ...left } = this.justTicked;
+        this.justTicked = left;
+      }, LINGER_MS),
+    );
   }
 
   remove(uid: string) {

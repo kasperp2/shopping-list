@@ -26,9 +26,8 @@
 
 </script>
 
-<svelte:window onscroll={() => (collapsed = window.scrollY > 36)} />
-
-<main class="list" style:padding-bottom="{barHeight + 24}px">
+<main class="scroller" onscroll={(e) => (collapsed = e.currentTarget.scrollTop > 36)}>
+<div class="list" style:padding-bottom="{barHeight + 24}px">
   <header class="nav" class:collapsed>
     <span class="status">
       {#if !app.online}
@@ -78,6 +77,7 @@
   {:else}
     <div class="empty"><span class="spinner big" aria-label="Henter"></span></div>
   {/if}
+</div>
 </main>
 
 <BottomBar bind:height={barHeight} />
@@ -90,8 +90,14 @@
 {/if}
 
 <style>
+  .scroller {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
   .list {
-    min-height: 100dvh;
+    min-height: 100%;
     max-width: 720px;
     margin: 0 auto;
   }

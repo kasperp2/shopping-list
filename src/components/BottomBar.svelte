@@ -120,7 +120,7 @@
 <div
   class="bar"
   bind:offsetHeight={height}
-  class:keyboard={keyboard > 0}
+  class:keyboard={keyboard > 40}
   style:transform={keyboard ? `translate3d(0, ${-keyboard}px, 0)` : undefined}
 >
   {#if text.trim() && suggestions.length}
@@ -230,6 +230,17 @@
   }
   .bar.keyboard {
     padding-bottom: 8px;
+  }
+  /* The bar's colour continues below it, so the strip between the field and
+     the keyboard (and behind the keyboard's rounded top) matches the bar. */
+  .bar::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    background: var(--bar);
   }
   .chips {
     display: flex;

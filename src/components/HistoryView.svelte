@@ -21,6 +21,12 @@
     return (d.getFullYear() === new Date().getFullYear() ? dateFmt : yearFmt).format(d);
   }
 
+  function readd(entry: { name: string; key: string }) {
+    const wasOpen = openKeys.has(entry.key);
+    app.add(entry.name);
+    if (!wasOpen) app.showToast(`${entry.name} tilføjet`);
+  }
+
   const openKeys = $derived(new Set(app.items.filter((i) => !i.completed).map((i) => nameKey(i.name))));
   const entries = $derived(
     app.history
@@ -44,13 +50,15 @@
     <div class="group">
       <div class="card">
         {#each entries as entry (entry.key)}
-          <SwipeRow ondelete={() => app.removeFromHistory(entry)}>
+          <SwipeRow
+            ondelete={() => app.removeFromHistory(entry)}
+            leading={{ label: 'Tilføj', icon: 'plus', color: 'var(--tint)', run: () => readd(entry) }}
+          >
             <button
               class="cell"
               onclick={() => {
                 haptic();
-                app.add(entry.name);
-                if (!openKeys.has(entry.key)) app.showToast(`${entry.name} tilføjet`);
+                readd(entry);
               }}
             >
               <span class="grow">
@@ -68,7 +76,7 @@
           </SwipeRow>
         {/each}
       </div>
-      <p class="group-footer">Tryk for at tilføje igen. Stryg til venstre for at slette varen fra historikken.</p>
+      <p class="group-footer">Tryk eller stryg til højre for at tilføje igen. Stryg til venstre for at slette varen fra historikken.</p>
     </div>
   {:else}
     <p class="empty">{query ? 'Ingen fund' : 'Afkrydsede varer vises her'}</p>

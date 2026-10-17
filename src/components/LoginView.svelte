@@ -98,7 +98,9 @@
 
 <style>
   .login {
-    min-height: 100dvh;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: calc(var(--safe-top) + 48px) 0 calc(var(--safe-bottom) + 24px);
     max-width: 520px;
     margin: 0 auto;
