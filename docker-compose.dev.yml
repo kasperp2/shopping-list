@@ -1,18 +1,36 @@
-# Local end-to-end setup: the app (built from source) + a Radicale server
-# with CORS enabled. Login: server http://localhost:5232, user test / test.
-#   docker compose -f docker-compose.dev.yml up --build
+# Development: Vite dev server with hot module reload + Radicale.
+#   docker compose -f docker-compose.dev.yml up
+# Open http://localhost:5173, or http://<your-mac's-LAN-IP>:5173 on a phone on
+# the same Wi-Fi. Login: test / test.
+#
+# By default the app talks to Radicale through the /dav proxy, so the phone
+# only needs to reach port 5173. To test direct (CORS) mode instead, start with
+#   DEV_PROXY= docker compose -f docker-compose.dev.yml up
+# and log in with server http://<LAN-IP>:5232.
 services:
-  app:
-    build: .
+  web:
+    image: oven/bun:1.4
+    working_dir: /app
+    command: sh -c "bun install && bun x vite --host 0.0.0.0 --port 5173 --strictPort"
     ports:
-      - "3000:3000"
-  # Same app in proxy mode on :3001 (CalDAV via the app's own origin).
-  app-proxy:
-    build: .
-    ports:
-      - "3001:3000"
+      - "5173:5173"
     environment:
-      CALDAV_PROXY_TARGET: "http://radicale:5232"
+      DEV_API: http://api:3000
+    volumes:
+      - .:/app
+      # Linux packages (sharp, esbuild…) stay in the container, apart from the Mac's node_modules.
+      - web_node_modules:/app/node_modules
+    depends_on:
+      - api
+  # Serves /config.json and the /dav proxy for the dev server (no static files needed).
+  api:
+    image: oven/bun:1.4-alpine
+    working_dir: /app
+    command: bun --watch server.ts
+    environment:
+      CALDAV_PROXY_TARGET: ${DEV_PROXY-http://radicale:5232}
+    volumes:
+      - ./server.ts:/app/server.ts:ro
   radicale:
     image: tomsquest/docker-radicale:latest
     ports:
@@ -21,3 +39,6 @@ services:
       - ./dev/radicale/config:/config/config:ro
       - ./dev/radicale/users:/config/users:ro
       - ./.radicale-data:/data
+
+volumes:
+  web_node_modules:

@@ -1,5 +1,5 @@
 import type { Credentials, Item, ShoppingList } from '../types';
-import { parseTodo } from './vtodo';
+import { newUid, parseTodo } from './vtodo';
 
 const DAV = 'DAV:';
 const CALDAV = 'urn:ietf:params:xml:ns:caldav';
@@ -221,7 +221,7 @@ export class DavClient {
   }
 
   async createList(home: string, name: string): Promise<string> {
-    const url = `${home.replace(/\/?$/, '/')}${crypto.randomUUID()}/`;
+    const url = `${home.replace(/\/?$/, '/')}${newUid()}/`;
     const body =
       `<?xml version="1.0" encoding="utf-8"?>` +
       `<c:mkcalendar xmlns:d="DAV:" xmlns:c="${CALDAV}"><d:set><d:prop>` +

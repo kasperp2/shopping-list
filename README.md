@@ -62,12 +62,13 @@ Access-Control-Expose-Headers = ETag
 Requires [Bun](https://bun.sh) ≥ 1.4.
 
 ```bash
-bun install
-docker compose -f docker-compose.dev.yml up -d --build   # Radicale on :5232 (test/test) + the app on :3000 and :3001 (proxy)
-bun run dev                                               # Vite on :5173 – log in with http://localhost:5232, test / test
-bun test tests                                            # unit tests
-bun run check                                             # type check
+docker compose -f docker-compose.dev.yml up -d   # Vite with hot reload on :5173 + Radicale on :5232 (test / test)
+bun install                                      # for the tests and the type check on the host
+bun test tests                                   # unit tests
+bun run check                                    # type check
 ```
+
+Open `http://localhost:5173`, or `http://<your computer's LAN IP>:5173` on a phone on the same Wi-Fi. Edits to `src/` reload on the phone straight away. By default the dev server reaches Radicale through the `/dav` proxy, so the phone only needs port 5173. To try direct (CORS) mode, start with `DEV_PROXY= docker compose -f docker-compose.dev.yml up -d` and log in with `http://<LAN IP>:5232`. Over plain http the service worker doesn't register, so offline mode and installing need the HTTPS production setup.
 
 The structure:
 

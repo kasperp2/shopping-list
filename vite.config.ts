@@ -35,9 +35,10 @@ export default defineConfig({
   ],
   server: {
     host: true,
+    // server.ts answers /config.json and proxies /dav (in docker-compose.dev.yml it's the "api" service)
     proxy: {
-      '/config.json': 'http://localhost:3000',
-      '/dav': 'http://localhost:3000',
+      '/config.json': process.env.DEV_API ?? 'http://localhost:3000',
+      '/dav': process.env.DEV_API ?? 'http://localhost:3000',
     },
   },
 });
