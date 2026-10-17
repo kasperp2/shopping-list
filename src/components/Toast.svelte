@@ -29,7 +29,7 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: calc(var(--bottom-bar, 110px) + 12px);
+    bottom: calc(var(--bottom-bar, 110px) + var(--keyboard, 0px) + 8px);
     z-index: 40;
     display: grid;
     justify-items: center;

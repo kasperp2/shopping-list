@@ -27,7 +27,7 @@
 </script>
 
 <main class="scroller" onscroll={(e) => (collapsed = e.currentTarget.scrollTop > 36)}>
-<div class="list" style:padding-bottom="{barHeight + 24}px">
+<div class="list" style:padding-bottom="calc({barHeight + 16}px + var(--keyboard, 0px))">
   <header class="nav" class:collapsed>
     <span class="status">
       {#if !app.online}

@@ -16,7 +16,8 @@
   --green: #34c759;
   --orange: #ff9500;
   --bar: rgba(249, 249, 249, 0.78);
-  --bar-solid: #f7f7f8; /* --bar composited over --bg */
+  --dock: #ffffff;
+  --dock-edge: rgba(0, 0, 0, 0.08);
   --sheet: #f2f2f7;
   --scrim: rgba(0, 0, 0, 0.3);
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -46,7 +47,8 @@
     --green: #30d158;
     --orange: #ff9f0a;
     --bar: rgba(22, 22, 24, 0.78);
-    --bar-solid: #111113;
+    --dock: #2c2c2e;
+    --dock-edge: rgba(255, 255, 255, 0.09);
     --sheet: #1c1c1e;
     --scrim: rgba(0, 0, 0, 0.5);
     --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -219,6 +221,5 @@ button.cell:active {
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --bar: var(--bg);
-    --bar-solid: var(--bg);
   }
 }
