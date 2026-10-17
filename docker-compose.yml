@@ -1,0 +1,12 @@
+services:
+  shopping-list:
+    image: ghcr.io/kasperp2/shopping-list:latest
+    container_name: shopping-list
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Optional: let this container forward CalDAV requests to your server,
+      # so Radicale needs no CORS setup. Leave empty to talk to it directly.
+      # CALDAV_PROXY_TARGET: "https://dav.example.com"
+      PORT: "3000"

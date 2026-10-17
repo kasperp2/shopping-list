@@ -1,0 +1,9 @@
+node_modules
+dist
+dev-dist
+.DS_Store
+*.local
+.radicale-data
+.claude
+.agents
+skills-lock.json

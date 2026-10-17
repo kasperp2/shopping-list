@@ -1,0 +1,23 @@
+# Local end-to-end setup: the app (built from source) + a Radicale server
+# with CORS enabled. Login: server http://localhost:5232, user test / test.
+#   docker compose -f docker-compose.dev.yml up --build
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+  # Same app in proxy mode on :3001 (CalDAV via the app's own origin).
+  app-proxy:
+    build: .
+    ports:
+      - "3001:3000"
+    environment:
+      CALDAV_PROXY_TARGET: "http://radicale:5232"
+  radicale:
+    image: tomsquest/docker-radicale:latest
+    ports:
+      - "5232:5232"
+    volumes:
+      - ./dev/radicale/config:/config/config:ro
+      - ./dev/radicale/users:/config/users:ro
+      - ./.radicale-data:/data

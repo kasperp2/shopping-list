@@ -1,0 +1,16 @@
+[server]
+hosts = 0.0.0.0:5232
+
+[auth]
+type = htpasswd
+htpasswd_filename = /config/users
+htpasswd_encryption = plain
+
+[storage]
+filesystem_folder = /data/collections
+
+[headers]
+Access-Control-Allow-Origin = *
+Access-Control-Allow-Methods = GET, PUT, DELETE, PROPFIND, PROPPATCH, REPORT, MKCALENDAR, MKCOL, OPTIONS
+Access-Control-Allow-Headers = Authorization, Content-Type, Depth, If-Match, If-None-Match, Prefer
+Access-Control-Expose-Headers = ETag
